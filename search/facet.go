@@ -85,7 +85,7 @@ func (s *RangeDsl) Filter(fl ...interface{}) *RangeDsl {
 		s.FilterVal = NewFilterWrap()
 	}
 
-	s.FilterVal.addFilters(fl)
+	s.FilterVal.AddFilters(fl)
 	return s
 }
 

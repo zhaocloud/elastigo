@@ -14,7 +14,6 @@ package search
 import (
 	"encoding/json"
 	"fmt"
-
 	. "github.com/araddon/gou"
 )
 
@@ -32,38 +31,52 @@ type FilterClause interface {
 
 // A wrapper to allow for custom serialization
 type FilterWrap struct {
-	boolClause string
-	filters    []interface{}
+	BoolClause string
+	Filters    []interface{}
 }
 
 func NewFilterWrap() *FilterWrap {
-	return &FilterWrap{filters: make([]interface{}, 0), boolClause: "and"}
+	return &FilterWrap{Filters: make([]interface{}, 0), BoolClause: "and"}
 }
 
 func (f *FilterWrap) String() string {
-	return fmt.Sprintf(`fopv: %d:%v`, len(f.filters), f.filters)
+	return fmt.Sprintf(`%s: %d:%v`, f.BoolClause, len(f.Filters), f.Filters)
 }
 
 // Custom marshalling to support the query dsl
-func (f *FilterWrap) addFilters(fl []interface{}) {
+func (f *FilterWrap) AddFilters(fl ...interface{}) {
 	if len(fl) > 1 {
 		fc := fl[0]
 		switch fc.(type) {
 		case BoolClause, string:
-			f.boolClause = fc.(string)
+			f.BoolClause = fc.(string)
 			fl = fl[1:]
 		}
 	}
-	f.filters = append(f.filters, fl...)
+	f.Filters = append(f.Filters, fl...)
 }
 
 // Custom marshalling to support the query dsl
 func (f *FilterWrap) MarshalJSON() ([]byte, error) {
 	var root interface{}
-	if len(f.filters) > 1 {
-		root = map[string]interface{}{f.boolClause: f.filters}
-	} else if len(f.filters) == 1 {
-		root = f.filters[0]
+	if len(f.Filters) > 1 {
+		if f.BoolClause == "bool" {
+			filter := map[string]interface{}{}
+			for _, flt := range f.Filters {
+				filter[flt.(*FilterWrap).BoolClause] = flt.(*FilterWrap).Filters
+			}
+			root = map[string]interface{}{f.BoolClause: filter}
+		} else {
+			root = map[string]interface{}{f.BoolClause: f.Filters}
+		}
+
+	} else if len(f.Filters) == 1 {
+		switch f.BoolClause {
+		case "bool", "must", "should", "must_not":
+			root = map[string]interface{}{f.BoolClause: f.Filters[0]}
+		default:
+			root = f.Filters[0]
+		}
 	}
 	return json.Marshal(root)
 }
@@ -128,13 +141,14 @@ func Filter() *FilterOp {
 
 func CompoundFilter(fl ...interface{}) *FilterWrap {
 	FilterVal := NewFilterWrap()
-	FilterVal.addFilters(fl)
+	FilterVal.AddFilters(fl...)
 	return FilterVal
 }
 
 type FilterOp struct {
 	curField    string
 	TermsMap    map[string][]interface{}          `json:"terms,omitempty"`
+	TermMap     map[string]interface{}            `json:"term,omitempty"`
 	Range       map[string]map[string]interface{} `json:"range,omitempty"`
 	Exist       map[string]string                 `json:"exists,omitempty"`
 	MisssingVal map[string]string                 `json:"missing,omitempty"`
@@ -171,6 +185,13 @@ func (f *FilterOp) Terms(field string, values ...interface{}) *FilterOp {
 		f.TermsMap[field] = append(f.TermsMap[field], val)
 	}
 
+	return f
+}
+func (f *FilterOp) Term(field string, value interface{}) *FilterOp {
+	if len(f.TermMap) == 0 {
+		f.TermMap = make(map[string]interface{})
+	}
+	f.TermMap[field] = value
 	return f
 }
 func (f *FilterOp) From(from string) *FilterOp {

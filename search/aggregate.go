@@ -134,7 +134,7 @@ func (d *AggregateDsl) Filter(filters ...interface{}) *AggregateDsl {
 		d.Filters = NewFilterWrap()
 	}
 
-	d.Filters.addFilters(filters)
+	d.Filters.AddFilters(filters)
 	return d
 }
 

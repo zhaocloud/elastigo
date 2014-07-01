@@ -14,7 +14,7 @@ package cluster
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mattbaird/elastigo/api"
+	"github.com/zhaocloud/elastigo/api"
 )
 
 // UpdateSettings allows to update cluster wide specific settings. Defaults to Transient setting

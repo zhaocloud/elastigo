@@ -13,7 +13,7 @@ package indices
 
 import (
 	"fmt"
-	"github.com/mattbaird/elastigo/api"
+	"github.com/zhaocloud/elastigo/api"
 	"strings"
 )
 

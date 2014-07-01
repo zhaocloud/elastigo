@@ -67,17 +67,21 @@ type QueryEmbed struct {
 	//Exist    string            `json:"_exists_,omitempty"`
 }
 
+func (qd *QueryDsl) HasQuery() bool {
+	q := qd.QueryEmbed
+	if q.Qs != nil || len(q.Terms) > 0 || q.MatchAll != nil {
+		return true
+	}
+	return false
+}
+
 // MarshalJSON provides custom marshalling to support the query dsl which is a conditional
 // json format, not always the same parent/children
 func (qd *QueryDsl) MarshalJSON() ([]byte, error) {
-	q := qd.QueryEmbed
-	hasQuery := false
-	if q.Qs != nil || len(q.Terms) > 0 || q.MatchAll != nil {
-		hasQuery = true
-	}
+	hasQuery := qd.HasQuery()
 	// If a query has a
-	if qd.FilterVal != nil && hasQuery {
-		queryB, err := json.Marshal(q)
+	if qd.FilterVal != nil {
+		queryB, err := json.Marshal(qd.QueryEmbed)
 		if err != nil {
 			return queryB, err
 		}
@@ -85,9 +89,12 @@ func (qd *QueryDsl) MarshalJSON() ([]byte, error) {
 		if err != nil {
 			return filterB, err
 		}
-		return []byte(fmt.Sprintf(`{"filtered":{"query":%s,"filter":%s}}`, queryB, filterB)), nil
+		if hasQuery {
+			return []byte(fmt.Sprintf(`{"filtered":{"query":%s,"filter":%s}}`, queryB, filterB)), nil
+		}
+		return []byte(fmt.Sprintf(`{"filtered":{"filter":%s}}`, filterB)), nil
 	}
-	return json.Marshal(q)
+	return json.Marshal(qd.QueryEmbed)
 }
 
 // get all
@@ -206,7 +213,7 @@ func (s *Term) Filter(fl ...interface{}) *Term {
 		s.FilterVal = NewFilterWrap()
 	}
 
-	s.FilterVal.addFilters(fl)
+	s.FilterVal.AddFilters(fl)
 	return s
 }
 

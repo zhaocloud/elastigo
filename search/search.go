@@ -15,8 +15,8 @@ import (
 	"encoding/json"
 	"fmt"
 	u "github.com/araddon/gou"
-	"github.com/mattbaird/elastigo/api"
-	"github.com/mattbaird/elastigo/core"
+	"github.com/zhaocloud/elastigo/api"
+	"github.com/zhaocloud/elastigo/core"
 	"log"
 	"strconv"
 	"strings"
@@ -181,12 +181,17 @@ func (s *SearchDsl) Query(q *QueryDsl) *SearchDsl {
 //         Filter().Exists("repository.name"),
 //         Filter().Terms("repository.has_wiki", true)
 //     )
-func (s *SearchDsl) Filter(fl ...interface{}) *SearchDsl {
+func (s *SearchDsl) Filters(fl ...interface{}) *SearchDsl {
 	if s.FilterVal == nil {
 		s.FilterVal = NewFilterWrap()
 	}
 
-	s.FilterVal.addFilters(fl)
+	s.FilterVal.AddFilters(fl)
+	return s
+}
+
+func (s *SearchDsl) Filter(f *FilterWrap) *SearchDsl {
+	s.FilterVal = f
 	return s
 }
 
