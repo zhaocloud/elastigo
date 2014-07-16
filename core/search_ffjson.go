@@ -32,7 +32,7 @@ func (mj *SearchResult) MarshalJSONBuf(buf *bytes.Buffer) error {
 	} else {
 		buf.WriteString(`,`)
 	}
-	buf.WriteString(`"timed_out":`)
+	buf.WriteString(`"timedOut":`)
 	if mj.TimedOut {
 		buf.WriteString(`true`)
 	} else {
@@ -66,23 +66,7 @@ func (mj *SearchResult) MarshalJSONBuf(buf *bytes.Buffer) error {
 	// 	return err
 	// }
 	// buf.Write(obj)
-	if len(mj.Aggregations) != 0 {
-		if first == true {
-			first = false
-		} else {
-			buf.WriteString(`,`)
-		}
-		buf.WriteString(`"aggregations":`)
-		if mj.Aggregations != nil {
-			obj, err = mj.Aggregations.MarshalJSON()
-			if err != nil {
-				return err
-			}
-			buf.Write(obj)
-		} else {
-			buf.WriteString(`null`)
-		}
-	}
+
 	if len(mj.Facets) != 0 {
 		if first == true {
 			first = false
@@ -112,6 +96,23 @@ func (mj *SearchResult) MarshalJSONBuf(buf *bytes.Buffer) error {
 	err = mj.Hits.MarshalJSONBuf(buf)
 	if err != nil {
 		return err
+	}
+	if len(mj.Aggregations) != 0 {
+		if first == true {
+			first = false
+		} else {
+			buf.WriteString(`,`)
+		}
+		buf.WriteString(`"aggregations":`)
+		if mj.Aggregations != nil {
+			obj, err = mj.Aggregations.MarshalJSON()
+			if err != nil {
+				return err
+			}
+			buf.Write(obj)
+		} else {
+			buf.WriteString(`null`)
+		}
 	}
 	buf.WriteString(`}`)
 	return nil

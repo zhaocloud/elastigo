@@ -124,6 +124,19 @@ func (mj *SearchDsl) MarshalJSONBuf(buf *bytes.Buffer) error {
 			buf.WriteString(`null`)
 		}
 	}
+	if mj.HighlightVal != nil {
+		if first == true {
+			first = false
+		} else {
+			buf.WriteString(`,`)
+		}
+		buf.WriteString(`"highlight":`)
+		obj, err = json.Marshal(mj.HighlightVal)
+		if err != nil {
+			return err
+		}
+		buf.Write(obj)
+	}
 	buf.WriteString(`}`)
 	return nil
 }

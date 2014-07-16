@@ -177,12 +177,13 @@ type QueryWrap struct {
 
 // QueryString based search
 func NewQueryString(field, query string) QueryString {
-	return QueryString{"", field, query, "", "", nil}
+	return QueryString{"", field, true, query, "", "", nil}
 }
 
 type QueryString struct {
 	DefaultOperator string   `json:"default_operator,omitempty"`
 	DefaultField    string   `json:"default_field,omitempty"`
+	AnalyzeWildcard bool     `json:"analyze_wildcard"`
 	Query           string   `json:"query,omitempty"`
 	Exists          string   `json:"_exists_,omitempty"`
 	Missing         string   `json:"_missing_,omitempty"`

@@ -50,6 +50,7 @@ type SearchDsl struct {
 	FacetVal      *FacetDsl                `json:"facets,omitempty"`
 	QueryVal      *QueryDsl                `json:"query,omitempty"`
 	SortBody      []*SortDsl               `json:"sort,omitempty"`
+	HighlightVal  *Highlighting            `json:"highlight,omitempty"`
 	FilterVal     *FilterWrap              `json:"filter,omitempty"`
 	AggregatesVal map[string]*AggregateDsl `json:"aggregations,omitempty"`
 }
@@ -192,6 +193,11 @@ func (s *SearchDsl) Filters(fl ...interface{}) *SearchDsl {
 
 func (s *SearchDsl) Filter(f *FilterWrap) *SearchDsl {
 	s.FilterVal = f
+	return s
+}
+
+func (s *SearchDsl) Highlight(h *Highlighting) *SearchDsl {
+	s.HighlightVal = h
 	return s
 }
 
