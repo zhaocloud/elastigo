@@ -13,7 +13,7 @@ package search
 
 import (
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	//"log"
 	"strings"
 )
@@ -56,7 +56,8 @@ some ways to serialize
 */
 type QueryDsl struct {
 	QueryEmbed
-	FilterVal *FilterOp `json:"filter,omitempty"`
+	QueryBody map[string]interface{}
+	// FilterVal *FilterOp `json:"filter,omitempty"`
 }
 
 // The core Query Syntax can be embedded as a child of a variety of different parents
@@ -78,21 +79,8 @@ func (qd *QueryDsl) HasQuery() bool {
 // MarshalJSON provides custom marshalling to support the query dsl which is a conditional
 // json format, not always the same parent/children
 func (qd *QueryDsl) MarshalJSON() ([]byte, error) {
-	hasQuery := qd.HasQuery()
-	// If a query has a
-	if qd.FilterVal != nil {
-		queryB, err := json.Marshal(qd.QueryEmbed)
-		if err != nil {
-			return queryB, err
-		}
-		filterB, err := json.Marshal(qd.FilterVal)
-		if err != nil {
-			return filterB, err
-		}
-		if hasQuery {
-			return []byte(fmt.Sprintf(`{"filtered":{"query":%s,"filter":%s}}`, queryB, filterB)), nil
-		}
-		return []byte(fmt.Sprintf(`{"filtered":{"filter":%s}}`, filterB)), nil
+	if qd.QueryBody != nil {
+		return json.Marshal(qd.QueryBody)
 	}
 	return json.Marshal(qd.QueryEmbed)
 }
@@ -103,16 +91,16 @@ func (q *QueryDsl) All() *QueryDsl {
 	return q
 }
 
-// Limit the query to this range
-func (q *QueryDsl) Range(fop *FilterOp) *QueryDsl {
-	if q.FilterVal == nil {
-		q.FilterVal = fop
-		return q
-	}
-	// TODO:  this is not valid, refactor
-	q.FilterVal.Add(fop)
-	return q
-}
+// // Limit the query to this range
+// func (q *QueryDsl) Range(fop *FilterOp) *QueryDsl {
+// 	if q.FilterVal == nil {
+// 		q.FilterVal = fop
+// 		return q
+// 	}
+// 	// TODO:  this is not valid, refactor
+// 	q.FilterVal.Add(fop)
+// 	return q
+// }
 
 // Add a term search for a specific field
 //    Term("user","kimchy")
@@ -161,10 +149,10 @@ func (q *QueryDsl) Fields(fields, search, exists, missing string) *QueryDsl {
 }
 
 // Filter this query
-func (q *QueryDsl) Filter(f *FilterOp) *QueryDsl {
-	q.FilterVal = f
-	return q
-}
+// func (q *QueryDsl) Filter(f *FilterOp) *QueryDsl {
+// 	q.FilterVal = f
+// 	return q
+// }
 
 type MatchAll struct {
 	All string `json:"-"`
