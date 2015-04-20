@@ -7,7 +7,6 @@ package search
 
 import (
 	"bytes"
-
 	"encoding/json"
 )
 
@@ -55,15 +54,6 @@ func (mj *SearchDsl) MarshalJSONBuf(buf *bytes.Buffer) error {
 		}
 		buf.Write(obj)
 	}
-	if mj.FromVal != 0 {
-		if first == true {
-			first = false
-		} else {
-			buf.WriteString(`,`)
-		}
-		buf.WriteString(`"from":`)
-		ffjson_FormatBits(buf, uint64(mj.FromVal), 10, mj.FromVal < 0)
-	}
 	if mj.QueryVal != nil {
 		if first == true {
 			first = false
@@ -88,8 +78,17 @@ func (mj *SearchDsl) MarshalJSONBuf(buf *bytes.Buffer) error {
 				return err
 			}
 			buf.Write(obj)
-			buf.WriteString(`}}`)
 		}
+		buf.WriteString(`}}`)
+	}
+	if mj.FromVal != 0 {
+		if first == true {
+			first = false
+		} else {
+			buf.WriteString(`,`)
+		}
+		buf.WriteString(`"from":`)
+		ffjson_FormatBits(buf, uint64(mj.FromVal), 10, mj.FromVal < 0)
 	}
 	if mj.SizeVal != 0 {
 		if first == true {
