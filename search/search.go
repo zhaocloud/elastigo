@@ -44,7 +44,6 @@ func Search(index string) *SearchDsl {
 type SearchDsl struct {
 	args          map[string]interface{}
 	types         []string
-	searchType    string
 	FromVal       int                      `json:"from,omitempty"`
 	SizeVal       int                      `json:"size,omitempty"`
 	Index         string                   `json:"-"`
@@ -82,9 +81,6 @@ func (s *SearchDsl) Result() (*core.SearchResult, error) {
 
 func (s *SearchDsl) url() string {
 	url := fmt.Sprintf("/%s%s/_search", s.Index, s.getType())
-	if s.searchType != "" {
-		url += "?search_type=" + s.searchType
-	}
 	return url
 }
 
@@ -137,7 +133,7 @@ func (s *SearchDsl) Source(returnSource bool) *SearchDsl {
 }
 
 func (s *SearchDsl) SearchType(searchType string) *SearchDsl {
-	s.searchType = searchType
+	s.args["search_type"] = searchType
 	return s
 }
 
