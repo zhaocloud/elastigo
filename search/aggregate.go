@@ -15,7 +15,9 @@ type AggregateDsl struct {
 }
 
 type FieldAggregate struct {
-	Field string `json:"field"`
+	Field       string `json:"field"`
+	Size        int    `json:"size,omitempty"`
+	MinDocCount int    `json:"min_doc_count,omitempty"`
 }
 
 /**
