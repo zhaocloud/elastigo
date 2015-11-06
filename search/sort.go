@@ -29,6 +29,7 @@ func Sort(field string) *SortDsl {
 type SortBody []interface{}
 type SortDsl struct {
 	Name   string
+	Body   interface{}
 	IsDesc bool
 }
 
@@ -47,6 +48,9 @@ func (s *SortDsl) MarshalJSON() ([]byte, error) {
 	}
 	if s.Name == "_score" {
 		return []byte(`"_score"`), nil
+	}
+	if s.Name == "_script" {
+		return json.Marshal(map[string]interface{}{s.Name: s.Body})
 	}
 	return []byte(fmt.Sprintf(`"%s"`, s.Name)), nil // "user"  assuming default = asc?
 }
